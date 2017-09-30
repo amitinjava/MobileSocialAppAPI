@@ -1,0 +1,91 @@
+{
+	"variables": [],
+	"info": {
+		"name": "User API",
+		"_postman_id": "45425594-32dc-1607-7c74-bdda5ff6de3b",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "activate",
+			"request": {
+				"url": "http://localhost:8080/MobileSocialAppAPI/api/user/activate",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"email\":\"amit@gmail.com\",\n\"registrationCode\":\"2pgVp0w\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"request": {
+				"url": "http://localhost:8080/MobileSocialAppAPI/api/user/register",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"email\":\"amit12@gmail.com\",\n\"password\":\"12345\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "forgotpassword",
+			"request": {
+				"url": "http://localhost:8080/MobileSocialAppAPI/api/user/forgotpassword",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"email\":\"amit@gmail.com\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"url": "http://localhost:8080/MobileSocialAppAPI/api/user/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"email\":\"amit@gmail.com\",\n\"password\":\"123485\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
