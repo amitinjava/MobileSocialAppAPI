@@ -27,8 +27,8 @@ public class SendEmail {
     try {    
      MimeMessage message = new MimeMessage(session);    
      message.addRecipient(Message.RecipientType.TO,new InternetAddress(to));    
-     message.setSubject("test");    
-     message.setText("hello");    
+     message.setSubject("registration code");    
+     message.setText("Your registration code is :: "+registrationCode);    
      //send message  
      Transport.send(message);    
      System.out.println("message sent successfully");    
