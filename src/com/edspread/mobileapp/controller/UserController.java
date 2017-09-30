@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dto.UserDto;
+import com.edspread.mobileapp.utils.PasswordGenerator;
 import com.edspread.mobileapp.utils.AppUtillty;
 import com.edspread.mobileapp.utils.RandomCode;
 import com.edspread.mobileapp.utils.SendEmail;
@@ -55,6 +56,8 @@ public class UserController {
 		user.active = false;
 		String code = appUtillty.getValidationCode(6);
 		user.registrationCode = code;
+		String encryptedPassword = PasswordGenerator.encryptPassword(user.password);
+		user.password = encryptedPassword;
 		int status = userdao.register(user);
 		
 		if (status == 1) {
@@ -97,12 +100,11 @@ public class UserController {
 	 */
 	@RequestMapping(value = "/forgotpassword", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
 	public @ResponseBody String forgotPassword(@RequestBody UserDto user) {
-		System.out.println(user.email);
 		UserDto userDto = userdao.forgotPassword(user.email);
 		if (userDto != null) {
-			
 			try {
-				final String body = "Password: " + userDto.password;
+				String decryptPassword = PasswordGenerator.decryptPassword(userDto.password);
+				final String body = "Password: " + decryptPassword;
 				final List<String> toList = new ArrayList<String>();
 				toList.add(user.email);
 				
