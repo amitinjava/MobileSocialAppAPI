@@ -90,7 +90,7 @@ public class UserDao {
         return usr.id;
 	}
 	
-	public Integer forgotPassword(String email){
+	public UserDto forgotPassword(String email){
 
 		String sql = "select * from APIUser where email=?";
 		User usr = null;
@@ -113,9 +113,12 @@ public class UserDao {
 			return null;
 		}
 		
-		
-        return usr.id;
-	
+		UserDto udo = null;
+		if(usr.id != null){
+			udo = new UserDto();
+			udo.password = usr.password;
+		}
+        return udo;
 	}
 
 }

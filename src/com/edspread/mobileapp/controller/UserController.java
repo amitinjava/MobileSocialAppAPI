@@ -3,6 +3,9 @@
  */
 package com.edspread.mobileapp.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dto.UserDto;
+import com.edspread.mobileapp.utils.AppUtillty;
 import com.edspread.mobileapp.utils.RandomCode;
 import com.edspread.mobileapp.utils.SendEmail;
 
@@ -25,6 +29,8 @@ import com.edspread.mobileapp.utils.SendEmail;
 public class UserController {
 	@Autowired
 	UserDao userdao;
+	@Autowired
+	AppUtillty appUtillty;
 
 	/**
 	 * @param user
@@ -47,16 +53,21 @@ public class UserController {
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
 	public @ResponseBody String register(@RequestBody UserDto user) {
 		user.active = false;
-		String code = RandomCode.generate();
+		String code = appUtillty.getValidationCode(6);
 		user.registrationCode = code;
 		int status = userdao.register(user);
-		try {
-			SendEmail se = new SendEmail();
-			 se.send(user.email, user.registrationCode);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 		if (status == 1) {
+			try {
+				final String body = "Validation Code:" + code;
+				final List<String> toList = new ArrayList<String>();
+				toList.add(user.email);
+				
+				appUtillty.sendMail2Users(toList, body, "info@ttmac.com",
+						"Edspread", "Validation Code", null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			return "true";
 		} else {
 			return "false";
@@ -87,8 +98,20 @@ public class UserController {
 	@RequestMapping(value = "/forgotpassword", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
 	public @ResponseBody String forgotPassword(@RequestBody UserDto user) {
 		System.out.println(user.email);
-		Integer id = userdao.forgotPassword(user.email);
-		if (id != null) {
+		UserDto userDto = userdao.forgotPassword(user.email);
+		if (userDto != null) {
+			
+			try {
+				final String body = "Password: " + userDto.password;
+				final List<String> toList = new ArrayList<String>();
+				toList.add(user.email);
+				
+				appUtillty.sendMail2Users(toList, body, "info@ttmac.com",
+						"Edspread", "Password", null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			return "password is sent to your registered email";
 		} else {
 			return "Wrong Email";

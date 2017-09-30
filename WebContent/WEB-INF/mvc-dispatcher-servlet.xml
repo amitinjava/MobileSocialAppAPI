@@ -36,4 +36,20 @@
 <bean id = "userDao" class = "com.edspread.mobileapp.dao.UserDao">
 <property name="jdbcTemplate" ref="jdbcTemplate"></property>  
 </bean>
+
+
+<bean id="appUtility" class="com.edspread.mobileapp.utils.AppUtillty"
+        scope="singleton">
+        <property name="settings" ref="settings" />
+    </bean>
+ <bean id="settings" class="com.edspread.mobileapp.utils.EmailSettings"
+        scope="singleton">
+        <property name="host" value="smtp.gmail.com" />
+        <property name="port" value="465" />
+        <property name="username" value="edspread.vijay@gmail.com" />
+        <property name="password" value="vijay@123456" />
+        <property name="socketFactoryClass" value="javax.net.ssl.SSLSocketFactory" />
+        <property name="mode" value="live" />
+        <property name="debug" value="true" />
+    </bean>
 </beans>
