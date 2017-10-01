@@ -91,7 +91,6 @@ public class UserDao {
 		if(usr == null){
 			return null;
 		}
-		System.out.println(usr.id);
 		if(usr != null){
 			String usql = "update APIUser set active =? where id=?";
 	        jdbcTemplate.update(usql, new Object[]

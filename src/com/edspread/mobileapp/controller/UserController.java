@@ -61,6 +61,9 @@ public class UserController {
 			if(!udo.active){
 				String[] errors = {"Your account is not activated."};
 				rd.errors = errors;
+			}else if(udo.active){
+				String[] messages = {"Successfully Logged-In."};
+				rd.messages = messages;
 			}
 		}
 		return rd;
