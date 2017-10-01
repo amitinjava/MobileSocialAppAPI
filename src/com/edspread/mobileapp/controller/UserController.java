@@ -163,6 +163,7 @@ public class UserController {
 		}
 		UserDto userDto = userdao.forgotPassword(user.email);
 		if (userDto != null) {
+			if(userDto.active){
 			try {
 				String decryptPassword = PasswordGenerator.decryptPassword(userDto.password);
 				final String body = "Password: " + decryptPassword;
@@ -177,6 +178,12 @@ public class UserController {
 			rd.data = true;
 			String messages[] = {"password is sent to your registered email"};
 			rd.messages = messages;
+			}else{
+				rd.data = false;
+				String errors[] = {"Your account is not activated to get password in email."};
+				rd.errors = errors;
+
+			}
 		} else {
 			rd.data = false;
 			String errors[] = {"Wrong Email"};

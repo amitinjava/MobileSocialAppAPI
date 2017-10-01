@@ -115,6 +115,7 @@ public class UserDao {
             	usr.setId(rs.getInt(1));
             	usr.setEmail(rs.getString(2));
             	usr.setPassword(rs.getString(3));
+            	usr.setActive(rs.getBoolean(5));
                 return usr;
             }
         });
@@ -126,6 +127,7 @@ public class UserDao {
 		if(usr.id != null){
 			udo = new UserDto();
 			udo.password = usr.password;
+			udo.active = usr.active;
 		}
         return udo;
 	}
