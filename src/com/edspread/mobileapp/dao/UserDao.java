@@ -6,12 +6,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.entity.User;
+import com.edspread.mobileapp.utils.PasswordGenerator;
 
 public class UserDao {
 	
@@ -20,7 +22,7 @@ public class UserDao {
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {  
 	    this.jdbcTemplate = jdbcTemplate;  
 	}  
-	public int register(UserDto user){
+	public int register(UserDto user) throws DuplicateKeyException{
 		
 		
 		String sql = "insert into APIUser values(?,?,?,?,?)";
@@ -31,12 +33,12 @@ public class UserDao {
 		return status;
 	}
 	
-	public Integer login(String email, String password){
-		String sql = "select * from APIUser where email=? and password = ?";
+	public UserDto login(String email, String password){
+		String sql = "select * from APIUser where email=?";
 		User usr = null;
 		try{
 		usr = (User) jdbcTemplate.queryForObject(sql, new Object[]
-        { email, password }, new RowMapper()
+        { email }, new RowMapper()
         {
             @Override
             public User mapRow(ResultSet rs, int rowNum) throws SQLException
@@ -45,6 +47,8 @@ public class UserDao {
             	User usr = new User();
             	usr.setId(rs.getInt(1));
             	usr.setEmail(rs.getString(2));
+            	usr.setPassword(rs.getString(3));
+            	usr.setActive(rs.getBoolean(5));
                 return usr;
             }
         });
@@ -52,9 +56,15 @@ public class UserDao {
 		}catch(EmptyResultDataAccessException e){
 			return null;
 		}
-		
-		
-        return usr.id;
+		String dpassword = PasswordGenerator.decryptPassword(usr.password);
+		UserDto udo = new UserDto();
+		if( usr.id != null  && password.equals(dpassword)){
+			udo.active = usr.active;
+			return udo;
+		}else{
+			return null;
+		}
+        
 	}
 	
 	public Integer activate(UserDto user){
