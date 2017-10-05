@@ -48,7 +48,9 @@ public class FileController {
 		if (!uploadDirFp.exists()) {
             if (!uploadDirFp.mkdirs()) {
                System.out.println("Failed to create directory");
-                return null;
+               String[] errors = {"Failed to create directory"};
+               rd.errors = errors;
+                return rd;
             }
         }
 		
