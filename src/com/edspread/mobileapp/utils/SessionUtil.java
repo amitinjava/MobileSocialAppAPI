@@ -22,7 +22,7 @@ public class SessionUtil {
 
 	public static String getContextPath() {
 		if (CONTEXT_PATH == null) {
-			CONTEXT_PATH = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getServletContext().getContextPath();
+			CONTEXT_PATH = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getServletContext().getRealPath("/");
 			// CONTEXT_PATH =
 			// CONTEXT_PATH.substring(0,CONTEXT_PATH.indexOf("pages")-1);
 		}
