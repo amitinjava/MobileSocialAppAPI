@@ -7,8 +7,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Controller;
@@ -43,7 +43,6 @@ public class FileController {
 		ResponseData rd= new ResponseData();
 		String contextPath = com.edspread.mobileapp.utils.SessionUtil.getContextPath();
 		
-		System.out.println("path : "+contextPath);
 		String uploadDir = contextPath + File.separator + "upload" + File.separator + DateUtil.getFormattedDateTime();
 		File uploadDirFp = new File(uploadDir);
 		if (!uploadDirFp.exists()) {
@@ -54,7 +53,7 @@ public class FileController {
         }
 		
 		
-		List<String> fileList = new ArrayList<String>();
+		Map<String,String> files = new HashMap<String,String>();
 		if(inputFile != null){
 		String inputFileName =  inputFile.getOriginalFilename();
 		String uploadedFileServerPath = "upload" + "/" + DateUtil.getFormattedDateTime() + "/"+ inputFileName;
@@ -70,7 +69,7 @@ public class FileController {
 			e.printStackTrace();
 		}
 		uploadedFileServerPath = MobileAppConstant.SERVERHTTPPATH + uploadedFileServerPath;
-		fileList.add(uploadedFileServerPath);
+		files.put("inputFile",uploadedFileServerPath);
 		}
 		if(thumbnailFile != null){
 		String thumbnailFileName =  thumbnailFile.getOriginalFilename();
@@ -88,9 +87,9 @@ public class FileController {
 		}
 		
 		thumbnailFilePath = MobileAppConstant.SERVERHTTPPATH + thumbnailFilePath;
-		fileList.add(thumbnailFilePath);
+		files.put("thumbnailFile",thumbnailFilePath);
 		}
-		rd.data = fileList;
+		rd.data = files;
 		return rd;
 
 	}
