@@ -39,9 +39,15 @@ public class FileController {
 	 */
 	@RequestMapping(value = "/upload", method = RequestMethod.POST, headers=("content-type=multipart/*"))
 //	public @ResponseBody ResponseData upload(@RequestParam("file") MultipartFile[] inputFiles) {
-	public @ResponseBody ResponseData upload(@RequestParam("inputFile") MultipartFile inputFile,@RequestParam("thumbnailFile") MultipartFile thumbnailFile) {
+	public @ResponseBody ResponseData upload(@RequestParam(value="inputFile" , required=false) MultipartFile inputFile,@RequestParam(value="thumbnailFile", required=false) MultipartFile thumbnailFile) {
 		ResponseData rd= new ResponseData();
 		String contextPath = com.edspread.mobileapp.utils.SessionUtil.getContextPath();
+		
+		if(inputFile == null && thumbnailFile == null){
+			String[] errors = {"inputFile or thumbnailFile is mandatory field."};
+            rd.errors = errors;
+            return rd;
+		}
 		
 		String uploadDir = contextPath + File.separator + "upload" + File.separator + DateUtil.getFormattedDateTime();
 		File uploadDirFp = new File(uploadDir);
