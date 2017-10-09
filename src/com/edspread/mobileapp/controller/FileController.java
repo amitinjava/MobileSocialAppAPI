@@ -41,7 +41,7 @@ public class FileController {
 //	public @ResponseBody ResponseData upload(@RequestParam("file") MultipartFile[] inputFiles) {
 	public @ResponseBody ResponseData upload(@RequestParam(value="inputFile" , required=false) MultipartFile inputFile,@RequestParam(value="thumbnailFile", required=false) MultipartFile thumbnailFile) {
 		ResponseData rd= new ResponseData();
-		String contextPath = com.edspread.mobileapp.utils.SessionUtil.getContextPath();
+		String contextPath = SessionUtil.getContextPath();
 		
 		if(inputFile == null && thumbnailFile == null){
 			String[] errors = {"inputFile or thumbnailFile is mandatory field."};
