@@ -212,6 +212,7 @@ public class UserController {
 		xmppUserDTO.setPlainPassword(decryptPassword);
 		xmppUserDTO.setEncryptedPassword(user.password);
 		//xmppUserDTO.setName(user.getPhone());
+		xmppUserDTO.setName(user.getEmail());
 		xmppUserDTO.setEmail(user.getEmail());
 		xmppUserDTO.setCreatedAt(createdAt);
 		xmppUserDTO.setUpdatedAt(createdAt);
