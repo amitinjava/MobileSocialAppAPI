@@ -19,8 +19,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dto.ResponseData;
 import com.edspread.mobileapp.dto.UserDto;
+import com.edspread.mobileapp.dto.XmppUserDTO;
+import com.edspread.mobileapp.entity.User;
 import com.edspread.mobileapp.utils.PasswordGenerator;
 import com.edspread.mobileapp.utils.AppUtillty;
+import com.edspread.mobileapp.utils.DateUtil;
+import com.edspread.mobileapp.utils.JDBCUtill;
 import com.edspread.mobileapp.utils.RandomCode;
 import com.edspread.mobileapp.utils.SendEmail;
 
@@ -133,8 +137,13 @@ public class UserController {
 			rd.errors = errors;
 			return rd;
 		}
-		Integer id = userdao.activate(user);
-		if (id != null) {
+		User usr = userdao.activate(user);
+		try {
+			registerUserOnXmpp(usr);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (usr.getId() != null) {
 			rd.data = true;
 			String messages[] = {"User is Activated"};
 			rd.messages = messages;
@@ -190,6 +199,23 @@ public class UserController {
 			rd.messages = errors;
 		}
 		return rd;
+	}
+	
+	private int registerUserOnXmpp(User user) throws Exception {
+		String createdAt = "" + DateUtil.getTimeInLong();
+		//password = user.getPhone().substring(0, 5);
+		String decryptPassword = PasswordGenerator.decryptPassword(user.password);
+		//String encryptedPassword = PasswordGenerator.encryptPassword(password);
+		XmppUserDTO xmppUserDTO = new XmppUserDTO();
+		//xmppUserDTO.setUserName(user.getPhone());
+		xmppUserDTO.setUserName(user.getEmail());
+		xmppUserDTO.setPlainPassword(decryptPassword);
+		xmppUserDTO.setEncryptedPassword(user.password);
+		//xmppUserDTO.setName(user.getPhone());
+		xmppUserDTO.setEmail(user.getEmail());
+		xmppUserDTO.setCreatedAt(createdAt);
+		xmppUserDTO.setUpdatedAt(createdAt);
+		return JDBCUtill.addXMPPUser(xmppUserDTO);
 	}
 
 }

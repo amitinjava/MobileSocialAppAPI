@@ -67,7 +67,7 @@ public class UserDao {
         
 	}
 	
-	public Integer activate(UserDto user){
+	public User activate(UserDto user){
 		String sql = "select * from APIUser where email=? and registrationCode=?";
 		User usr = null;
 		try{
@@ -81,6 +81,7 @@ public class UserDao {
             	User usr = new User();
             	usr.setId(rs.getInt(1));
             	usr.setEmail(rs.getString(2));
+            	usr.setPassword(rs.getString(3));
                 return usr;
             }
         });
@@ -96,7 +97,7 @@ public class UserDao {
 	        jdbcTemplate.update(usql, new Object[]
 	        { true, usr.id });
 	    }
-        return usr.id;
+        return usr;
 	}
 	
 	public UserDto forgotPassword(String email){
