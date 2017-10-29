@@ -208,7 +208,7 @@ public class UserController {
 		//String encryptedPassword = PasswordGenerator.encryptPassword(password);
 		XmppUserDTO xmppUserDTO = new XmppUserDTO();
 		//xmppUserDTO.setUserName(user.getPhone());
-		xmppUserDTO.setUserName(user.getEmail());
+		xmppUserDTO.setUserName(user.getEmail().replace("@", "_"));
 		xmppUserDTO.setPlainPassword(decryptPassword);
 		xmppUserDTO.setEncryptedPassword(user.password);
 		//xmppUserDTO.setName(user.getPhone());

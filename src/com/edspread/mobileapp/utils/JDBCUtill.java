@@ -15,7 +15,7 @@ private static Connection getConnection() {
 		
 		Connection con = null;
 		String userName = "root";
-		String password = "";
+		String password = "123456";
 	    String url = "jdbc:mysql://localhost:3306/txttimemac";
 	 	try {
 			Class.forName ("com.mysql.jdbc.Driver").newInstance ();
