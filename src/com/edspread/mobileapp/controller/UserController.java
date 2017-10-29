@@ -96,6 +96,25 @@ public class UserController {
 		try {
 			status = userdao.register(user);
 		}catch (DuplicateKeyException dke){
+			User duser = userdao.getDeactivateUser(user);
+			if(duser != null){
+				try {
+					int upstatus = userdao.updateRegistrationCode(user.getEmail(),  code, encryptedPassword);
+					
+					final String body = "Validation Code:" + code;
+					final List<String> toList = new ArrayList<String>();
+					toList.add(user.email);
+					
+					appUtillty.sendMail2Users(toList, body, "info@ttmac.com",
+							"Edspread", "Validation Code", null);
+				} catch (Exception  e) {
+					e.printStackTrace();
+				}
+				rd.data = true;
+				String[] messages = {"Successfully Registered"};
+				rd.messages = messages;
+				return rd;
+			}
 			rd.data = false;
 			String[] errors = {"Supplied email exists in the System."};
 			rd.errors = errors;

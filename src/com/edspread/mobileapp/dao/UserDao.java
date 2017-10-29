@@ -67,6 +67,39 @@ public class UserDao {
         
 	}
 	
+	
+	public User getDeactivateUser(UserDto user){
+		String sql = "select * from APIUser where email=? and active=0";
+		User usr = null;
+		try{
+		usr = (User) jdbcTemplate.queryForObject(sql, new Object[]
+        { user.getEmail() }, new RowMapper()
+        {
+            @Override
+            public User mapRow(ResultSet rs, int rowNum) throws SQLException
+            {
+            	
+            	User usr = new User();
+            	usr.setId(rs.getInt(1));
+            	usr.setEmail(rs.getString(2));
+            	usr.setPassword(rs.getString(3));
+                return usr;
+            }
+        });
+		
+		}catch(EmptyResultDataAccessException e){
+			return null;
+		}
+		return usr;
+	}
+	
+	public int updateRegistrationCode(String email, String registrationCode, String password){
+			String usql = "update APIUser set registrationCode =? , password=? where email=?";
+	        int status = jdbcTemplate.update(usql, new Object[]
+	        { registrationCode, password, email });
+	    return status;
+	}
+	
 	public User activate(UserDto user){
 		String sql = "select * from APIUser where email=? and registrationCode=?";
 		User usr = null;
