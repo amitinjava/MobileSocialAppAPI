@@ -40,6 +40,9 @@
 <bean id = "userDao" class = "com.edspread.mobileapp.dao.UserDao">
 <property name="jdbcTemplate" ref="jdbcTemplate"></property>  
 </bean>
+<bean id = "userFriendsDao" class = "com.edspread.mobileapp.dao.UserFriendsDao">
+<property name="jdbcTemplate" ref="jdbcTemplate"></property>  
+</bean>
 
 
 <bean id="appUtility" class="com.edspread.mobileapp.utils.AppUtillty"

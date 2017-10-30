@@ -4,12 +4,11 @@
 package com.edspread.mobileapp.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,16 +16,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.edspread.mobileapp.dao.UserDao;
+import com.edspread.mobileapp.dao.UserFriendsDao;
 import com.edspread.mobileapp.dto.ResponseData;
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.dto.XmppUserDTO;
 import com.edspread.mobileapp.entity.User;
-import com.edspread.mobileapp.utils.PasswordGenerator;
+import com.edspread.mobileapp.entity.UserFriends;
 import com.edspread.mobileapp.utils.AppUtillty;
 import com.edspread.mobileapp.utils.DateUtil;
 import com.edspread.mobileapp.utils.JDBCUtill;
-import com.edspread.mobileapp.utils.RandomCode;
-import com.edspread.mobileapp.utils.SendEmail;
+import com.edspread.mobileapp.utils.PasswordGenerator;
 
 /**
  * @author Amit.Kumar1
@@ -38,6 +37,8 @@ import com.edspread.mobileapp.utils.SendEmail;
 public class UserController {
 	@Autowired
 	UserDao userdao;
+	@Autowired
+	UserFriendsDao userFriendsDao;
 	@Autowired
 	AppUtillty appUtillty;
 
@@ -159,6 +160,7 @@ public class UserController {
 		User usr = userdao.activate(user);
 		try {
 			registerUserOnXmpp(usr);
+			addFriends(usr);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -236,6 +238,33 @@ public class UserController {
 		xmppUserDTO.setCreatedAt(createdAt);
 		xmppUserDTO.setUpdatedAt(createdAt);
 		return JDBCUtill.addXMPPUser(xmppUserDTO);
+	}
+	
+	private void addFriends(User user) {
+			List<User> userContactList = userFriendsDao.getFriends(user.getEmail());
+			UserFriends ufrnd;
+			Date currentDate = DateUtil.getTodayDate();
+			if(userContactList != null){
+				for (User usr : userContactList) {
+					ufrnd  = new UserFriends();
+					ufrnd.setUserId(user.getId());
+					ufrnd.setFriendId(usr.getId());
+					ufrnd.setUpdatedAt(currentDate);
+					ufrnd.setCreatedAt(currentDate);
+					userFriendsDao.saveFriend(ufrnd);
+					
+				}
+				
+				for (User usr : userContactList) {
+					ufrnd  = new UserFriends();
+					ufrnd.setUserId(usr.getId());
+					ufrnd.setFriendId(user.getId());
+					ufrnd.setUpdatedAt(currentDate);
+					ufrnd.setCreatedAt(currentDate);
+					userFriendsDao.saveFriend(ufrnd);
+					
+				}
+			}
 	}
 
 }
