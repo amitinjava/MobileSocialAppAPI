@@ -43,6 +43,7 @@ public class GroupDao {
 		groupparams.put("updated_at", today);
 		groupparams.put("active", true);
 		final Number groupId = insert.executeAndReturnKey(groupparams);
+		if(gdto.getEmails() != null && !gdto.getEmails().isEmpty()){
 		List<User> users = getMembersId(gdto.getEmails());
 		
 		
@@ -51,6 +52,7 @@ public class GroupDao {
 		System.out.println(groupId); 
 		       int status = jdbcTemplate.update(sql, new Object[]
 		        {null, groupId, user.getId(), today,today,null,null, true});
+		}
 		}
 		return groupId;
 	}
