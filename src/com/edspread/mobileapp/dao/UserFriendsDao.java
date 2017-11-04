@@ -73,7 +73,7 @@ public class UserFriendsDao {
 	}
 	
 	
-	public List<User> getFriends(String email){
+	public List<User> getFriendIds(String email){
 		String sql = "select * from APIUser where email !=? and active=1";
 		List<Map<String,Object>> usrs = null;
 		List<User> userList = new ArrayList<User>();
@@ -86,6 +86,24 @@ public class UserFriendsDao {
 			usr = new User();
 			usr.setId(Integer.parseInt(map.get("ID").toString()));
 			userList.add(usr);
+		}
+		
+		}catch(EmptyResultDataAccessException e){
+			return null;
+		}
+		return userList;
+	}
+	
+	public List<String> getFriendsEmail(String email){
+		String sql = "select username from ofuser where email !=?";
+		List<Map<String,Object>> usrs = null;
+		List<String> userList = new ArrayList<String>();
+		try{
+		usrs =  jdbcTemplate.queryForList(sql, new Object[]
+        { email });
+		
+		for(Map<String,Object> map:usrs){
+			userList.add(map.get("username").toString());
 		}
 		
 		}catch(EmptyResultDataAccessException e){

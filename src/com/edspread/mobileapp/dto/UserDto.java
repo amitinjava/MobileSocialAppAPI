@@ -6,6 +6,27 @@ public class UserDto {
 	public String password;
 	public String registrationCode;
 	public Boolean active;
+	public String name;
+	public String profilePix;
+	public Integer mobile;
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getProfilePix() {
+		return profilePix;
+	}
+	public void setProfilePix(String profilePix) {
+		this.profilePix = profilePix;
+	}
+	public Integer getMobile() {
+		return mobile;
+	}
+	public void setMobile(Integer mobile) {
+		this.mobile = mobile;
+	}
 	public Integer getId() {
 		return id;
 	}

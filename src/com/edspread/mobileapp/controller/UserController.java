@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.edspread.mobileapp.dao.UserDao;
@@ -159,13 +160,16 @@ public class UserController {
 		}
 		User usr = userdao.activate(user);
 		try {
+			if(usr != null){
 			registerUserOnXmpp(usr);
 			addFriends(usr);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (usr.getId() != null) {
-			rd.data = true;
+		if (usr != null && usr.getId() != null) {
+			List<String> emails = userFriendsDao.getFriendsEmail(user.email);
+			rd.data = emails;
 			String messages[] = {"User is Activated"};
 			rd.messages = messages;
 			return rd;
@@ -241,7 +245,7 @@ public class UserController {
 	}
 	
 	private void addFriends(User user) {
-			List<User> userContactList = userFriendsDao.getFriends(user.getEmail());
+			List<User> userContactList = userFriendsDao.getFriendIds(user.getEmail());
 			UserFriends ufrnd;
 			Date currentDate = DateUtil.getTodayDate();
 			if(userContactList != null){
@@ -265,6 +269,30 @@ public class UserController {
 					
 				}
 			}
+	}
+	
+	@RequestMapping(value = "/friends", method = RequestMethod.GET)
+	public @ResponseBody ResponseData friends(@RequestParam String email) {
+		List<String> emails = userFriendsDao.getFriendsEmail(email);
+		ResponseData rd= new ResponseData();
+		rd.data = emails;
+		return rd;
+	}
+	
+	@RequestMapping(value = "/userdetail", method = RequestMethod.GET)
+	public @ResponseBody ResponseData getUserdetail(@RequestParam String email) {
+		List<String> emails = userFriendsDao.getFriendsEmail(email);
+		ResponseData rd= new ResponseData();
+		rd.data = emails;
+		return rd;
+	}
+	
+	@RequestMapping(value = "/userdetail", method = RequestMethod.POST)
+	public @ResponseBody ResponseData addUserdetail(@RequestBody UserDto user) {
+		UserDto udo = userdao.addUserDetails(user);
+		ResponseData rd= new ResponseData();
+		//rd.data = emails;
+		return rd;
 	}
 
 }

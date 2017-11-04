@@ -165,5 +165,15 @@ public class UserDao {
 		}
         return udo;
 	}
+	
+	public UserDto getUserDetails(String email){
+		UserDto udo = null;
+		return udo;
+	}
+	
+	public UserDto addUserDetails(UserDto udo){
+		return udo;
+		
+	}
 
 }

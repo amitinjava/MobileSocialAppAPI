@@ -1,3 +1,5 @@
 delete from apiuser;
-ALTER TABLE apiuser
-ADD CONSTRAINT unique_email UNIQUE (email);
+ALTER TABLE APIUser ADD CONSTRAINT unique_email UNIQUE (email);
+
+
+ALTER TABLE APIUser ADD CONSTRAINT primary_key_id PRIMARY KEY(ID) AUTO_INCREMENT;
