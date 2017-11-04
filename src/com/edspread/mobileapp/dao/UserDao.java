@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -13,6 +14,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.entity.User;
+import com.edspread.mobileapp.entity.UserDetail;
 import com.edspread.mobileapp.utils.PasswordGenerator;
 
 public class UserDao {
@@ -171,9 +173,85 @@ public class UserDao {
 		return udo;
 	}
 	
-	public UserDto addUserDetails(UserDto udo){
-		return udo;
+	public int addUserDetails(UserDto udo){
+		User usr = getUserByEmail(udo.getEmail());
+		int status = 0;
+		if(usr != null){
+			Date today = new Date();
+			UserDetail udetail=getUserDetailsByEmail(udo.getEmail());
+			if(udetail.getId() == null){
+			String sql = "insert into USERDETAILS values(?,?,?,?,?,?,?,?,?,?)";
+
+	       status = jdbcTemplate.update(sql, new Object[]
+	        { null, usr.getId(), udo.getName(), udo.getMobile(),udo.getProfilePix(),today,today,null,null, true});
+			}else{
+				String updatesql = "update USERDETAILS set name =? , mobile=?, profilepix=?, updated_at=? where id=?";
+
+			       status = jdbcTemplate.update(updatesql, new Object[]
+			        { udo.getName(), udo.getMobile(),udo.getProfilePix(),today,udetail.getId()});
+			}
+		}
+			return status;
 		
+	}
+	
+	public UserDetail getUserDetailsByEmail(String email){
+		User usr = getUserByEmail(email);
+		int status = 0;
+		UserDetail ud = null;
+		if(usr != null){
+			String sql = "select * from USERDETAILS where userid=?";
+			
+			try{
+				ud = (UserDetail) jdbcTemplate.queryForObject(sql, new Object[]
+		        { usr.getId() }, new RowMapper()
+		        {
+		            @Override
+		            public UserDetail mapRow(ResultSet rs, int rowNum) throws SQLException
+		            {
+		            	
+		            	UserDetail usr = new UserDetail();
+		            	usr.setId(rs.getInt(1));
+		            	usr.setUserId(rs.getInt(2));
+		            	usr.setName(rs.getString(3));
+		            	usr.setMobile(Integer.parseInt(rs.getString(4)));
+		            	usr.setProfilePix(rs.getString(5));
+		                return usr;
+		            }
+		        });
+				
+				}catch(EmptyResultDataAccessException e){
+					return null;
+				}
+		}
+			return ud;
+		
+	}
+	
+	
+	
+	public User getUserByEmail(String email){
+		String sql = "select * from APIUser where email=?";
+		User usr = null;
+		try{
+		usr = (User) jdbcTemplate.queryForObject(sql, new Object[]
+        { email }, new RowMapper()
+        {
+            @Override
+            public User mapRow(ResultSet rs, int rowNum) throws SQLException
+            {
+            	
+            	User usr = new User();
+            	usr.setId(rs.getInt(1));
+            	usr.setEmail(rs.getString(2));
+                return usr;
+            }
+        });
+		
+		}catch(EmptyResultDataAccessException e){
+			return null;
+		}
+		return usr;
 	}
 
 }

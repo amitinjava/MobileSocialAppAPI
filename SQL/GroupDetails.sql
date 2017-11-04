@@ -8,10 +8,12 @@ CREATE TABLE GROUPS (
   updated_by varchar(1255) DEFAULT NULL,
   active tinyint(1) DEFAULT NULL,
   PRIMARY KEY (ID)
-)
+);
+
 
 CREATE TABLE GROUPSMEMBERS (
   ID int(10) NOT NULL AUTO_INCREMENT,
+  groupid int(10) NOT NULL,
   userid int(10) NOT NULL,
   created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,

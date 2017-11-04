@@ -3,10 +3,15 @@
  */
 package com.edspread.mobileapp.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
@@ -15,18 +20,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.edspread.mobileapp.constants.MobileAppConstant;
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dao.UserFriendsDao;
 import com.edspread.mobileapp.dto.ResponseData;
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.dto.XmppUserDTO;
 import com.edspread.mobileapp.entity.User;
+import com.edspread.mobileapp.entity.UserDetail;
 import com.edspread.mobileapp.entity.UserFriends;
 import com.edspread.mobileapp.utils.AppUtillty;
 import com.edspread.mobileapp.utils.DateUtil;
 import com.edspread.mobileapp.utils.JDBCUtill;
 import com.edspread.mobileapp.utils.PasswordGenerator;
+import com.edspread.mobileapp.utils.SessionUtil;
 
 /**
  * @author Amit.Kumar1
@@ -279,20 +288,87 @@ public class UserController {
 		return rd;
 	}
 	
-	@RequestMapping(value = "/userdetail", method = RequestMethod.GET)
+	@RequestMapping(value = "/details", method = RequestMethod.GET)
 	public @ResponseBody ResponseData getUserdetail(@RequestParam String email) {
-		List<String> emails = userFriendsDao.getFriendsEmail(email);
+		UserDetail userDetail = userdao.getUserDetailsByEmail(email);
 		ResponseData rd= new ResponseData();
-		rd.data = emails;
+		rd.data = userDetail;
 		return rd;
 	}
 	
-	@RequestMapping(value = "/userdetail", method = RequestMethod.POST)
-	public @ResponseBody ResponseData addUserdetail(@RequestBody UserDto user) {
-		UserDto udo = userdao.addUserDetails(user);
+	@RequestMapping(value = "/details", method = RequestMethod.POST, headers=("content-type=multipart/*"))
+	public @ResponseBody ResponseData addUserdetail(@RequestParam(value="inputFile" , required=false) MultipartFile inputFile,
+			@RequestParam String name,@RequestParam Integer mobile, @RequestParam String email) {
+		ResponseData urd = upload(inputFile);
+		
+		UserDto user = new UserDto();
+		user.setName(name);
+		user.setEmail(email);
+		user.setMobile(mobile);
+		if(urd.data != null){
+			user.setProfilePix(urd.data.toString());
+		}
+		int status = userdao.addUserDetails(user);
 		ResponseData rd= new ResponseData();
+		if(status == 1){
+		rd.data = true;
+		String messages[] = {"successfully Added."};
+		rd.messages = messages;
+		}else{
+			rd.data = false;
+		}
 		//rd.data = emails;
 		return rd;
+	}
+	
+	
+	
+	public ResponseData upload(MultipartFile inputFile) {
+		ResponseData rd= new ResponseData();
+		String contextPath = SessionUtil.getContextPath();
+		
+		
+		
+		String uploadDir = contextPath + File.separator + "upload" + File.separator + DateUtil.getFormattedDateTime();
+		File uploadDirFp = new File(uploadDir);
+		if (!uploadDirFp.exists()) {
+            if (!uploadDirFp.mkdirs()) {
+               System.out.println("Failed to create directory");
+               String[] errors = {"Failed to create directory"};
+               rd.errors = errors;
+                return rd;
+            }
+        }
+		
+		String uploadedFileServerPath = null;
+		//Map<String,String> files = new HashMap<String,String>();
+		if(inputFile != null){
+		String inputFileName =  inputFile.getOriginalFilename();
+		uploadedFileServerPath = "upload" + "/" + DateUtil.getFormattedDateTime() + "/"+ inputFileName;
+		String actualFilePath = SessionUtil.getContextPath() + File.separator + "upload" + File.separator + DateUtil.getFormattedDateTime()+ File.separator + inputFileName;
+		File destFile = new File(actualFilePath);
+		try {
+			FileUtils.copyFile(multipartToFile(inputFile), destFile);
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		uploadedFileServerPath = MobileAppConstant.SERVERHTTPPATH + uploadedFileServerPath;
+		//files.put("inputFile",uploadedFileServerPath);
+		}
+		rd.data = uploadedFileServerPath;
+		return rd;
+
+	}
+	
+	public File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException 
+	{
+	    File convFile = new File( multipart.getOriginalFilename());
+	    multipart.transferTo(convFile);
+	    return convFile;
 	}
 
 }
