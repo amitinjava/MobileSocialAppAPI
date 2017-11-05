@@ -44,12 +44,21 @@ public class GroupsController {
 		return rd;
 	}
 	
-	@RequestMapping(value = "/get/{groupid}", method = RequestMethod.GET)
-	public @ResponseBody ResponseData getGroups(@PathVariable("groupid") Integer groupId) {
+	@RequestMapping(value = "/details", method = RequestMethod.GET)
+	public @ResponseBody ResponseData getGroups(@RequestParam String groupname, @RequestParam String owneremail) {
 		ResponseData rd= new ResponseData();
-		
-		GroupDto group = groupdao.getGroupMembers(groupId);
+		User usr = userdao.findUserByEmail(owneremail);
+		GroupDto group = groupdao.getGroupMembers(groupname, usr);
 		rd.data = group;
+		return rd;
+	}
+	
+	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+	public @ResponseBody ResponseData deleteGroups(@RequestBody GroupDto group) {
+		ResponseData rd= new ResponseData();
+		User usr = userdao.findUserByEmail(group.getOwneremail());
+		int status = groupdao.deleteGroupMembers(group.getName(), usr);
+		rd.data = status;
 		return rd;
 	}
 

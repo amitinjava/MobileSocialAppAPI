@@ -120,13 +120,13 @@ public class GroupDao {
 		return userList;
 	}
 
-	public GroupDto getGroupMembers(Integer groupId) {
-		String groupsql = "SELECT gs.id as groupid, au.email as email, gs.name as name FROM apiuser au, groups gs, groupsmembers gms where au.ID = gms.userid and gs.id = gms.groupid and gs.id=?";
+	public GroupDto getGroupMembers(String grpName, User usr) {
+		String groupsql = "SELECT gs.id as groupid, au.email as email, gs.name as name FROM apiuser au, groups gs, groupsmembers gms where au.ID = gms.userid and gs.id = gms.groupid and gs.name=? and gs.owner=?";
 		List<Map<String,Object>> groupsmap = null;
 		GroupDto gdto = null;
 		try{
 			groupsmap =  jdbcTemplate.queryForList(groupsql, new Object[]
-	        { groupId });
+	        { grpName, usr.getId() });
 			
 			gdto = new GroupDto();
 			gdto.setEmails(new ArrayList<String>());
@@ -146,4 +146,13 @@ public class GroupDao {
 		return gdto;
 	}
 
+	public int deleteGroupMembers(String groupname , User usr) {
+		String sql = "delete from Groups where name =? and owner=?";
+		int status = jdbcTemplate.update(sql, new Object[]
+		        {groupname,  usr.getId()});
+		System.out.println(status);
+		return status;
+	}
+	
+	
 }
