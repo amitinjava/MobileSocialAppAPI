@@ -292,7 +292,13 @@ public class UserController {
 	public @ResponseBody ResponseData getUserdetail(@RequestParam String email) {
 		UserDetail userDetail = userdao.getUserDetailsByEmail(email);
 		ResponseData rd= new ResponseData();
-		rd.data = userDetail;
+		if(userDetail != null){
+			rd.data = userDetail;
+		}else{
+			rd.data = false;
+			String errors[] = {"email does not exist"};
+			rd.errors = errors;
+		}
 		return rd;
 	}
 	
@@ -316,6 +322,8 @@ public class UserController {
 		rd.messages = messages;
 		}else{
 			rd.data = false;
+			String errors[] = {"email does not exist."};
+			rd.errors = errors;
 		}
 		//rd.data = emails;
 		return rd;

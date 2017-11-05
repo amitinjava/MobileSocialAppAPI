@@ -35,7 +35,7 @@ public class GroupDao {
 	}
 	
 	private Groups findGroupIdByNameAndOwner(String groupName, Integer ownerid){
-		String sql = "SELECT * FROM GROUPS GP WHERE GP.OWNER = ? AND GP.NAME = ?";
+		String sql = "SELECT * FROM groups GP WHERE GP.owner = ? AND GP.name = ?";
 		Groups groups = null;
 		try{
 		groups =  (Groups)jdbcTemplate.queryForObject(sql, new Object[]
@@ -82,7 +82,7 @@ public class GroupDao {
 		List<User> users = getMembersId(gdto.getEmails());
 		
 		
-		String sql = "insert into GroupsMembers values(?,?,?,?,?,?,?,?)";
+		String sql = "insert into groupsmembers values(?,?,?,?,?,?,?,?)";
 		for(User user:users){
 		System.out.println(groupId); 
 		       int status = jdbcTemplate.update(sql, new Object[]
@@ -121,7 +121,7 @@ public class GroupDao {
 	}
 
 	public GroupDto getGroupMembers(String grpName, User usr) {
-		String groupsql = "SELECT gs.id as groupid, au.email as email, gs.name as name FROM apiuser au, groups gs, groupsmembers gms where au.ID = gms.userid and gs.id = gms.groupid and gs.name=? and gs.owner=?";
+		String groupsql = "SELECT gs.id as groupid, au.email as email, gs.name as name FROM APIUser au, groups gs, groupsmembers gms where au.ID = gms.userid and gs.id = gms.groupid and gs.name=? and gs.owner=?";
 		List<Map<String,Object>> groupsmap = null;
 		GroupDto gdto = null;
 		try{
@@ -147,7 +147,7 @@ public class GroupDao {
 	}
 
 	public int deleteGroupMembers(String groupname , User usr) {
-		String sql = "delete from Groups where name =? and owner=?";
+		String sql = "delete from groups where name =? and owner=?";
 		int status = jdbcTemplate.update(sql, new Object[]
 		        {groupname,  usr.getId()});
 		System.out.println(status);

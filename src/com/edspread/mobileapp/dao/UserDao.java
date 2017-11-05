@@ -176,13 +176,13 @@ public class UserDao {
 		if(usr != null){
 			Date today = new Date();
 			UserDetail udetail=getUserDetailsByEmail(udo.getEmail());
-			if(udetail.getId() == null){
-			String sql = "insert into USERDETAILS values(?,?,?,?,?,?,?,?,?,?)";
+			if(udetail == null){
+			String sql = "insert into userdetails values(?,?,?,?,?,?,?,?,?,?)";
 
 	       status = jdbcTemplate.update(sql, new Object[]
 	        { null, usr.getId(), udo.getName(), udo.getMobile(),udo.getProfilePix(),today,today,null,null, true});
 			}else{
-				String updatesql = "update USERDETAILS set name =? , mobile=?, profilepix=?, updated_at=? where id=?";
+				String updatesql = "update userdetails set name =? , mobile=?, profilepix=?, updated_at=? where id=?";
 
 			       status = jdbcTemplate.update(updatesql, new Object[]
 			        { udo.getName(), udo.getMobile(),udo.getProfilePix(),today,udetail.getId()});
@@ -197,7 +197,7 @@ public class UserDao {
 		int status = 0;
 		UserDetail ud = null;
 		if(usr != null){
-			String sql = "select * from USERDETAILS where userid=?";
+			String sql = "select * from userdetails where userid=?";
 			
 			try{
 				ud = (UserDetail) jdbcTemplate.queryForObject(sql, new Object[]

@@ -49,7 +49,13 @@ public class GroupsController {
 		ResponseData rd= new ResponseData();
 		User usr = userdao.findUserByEmail(owneremail);
 		GroupDto group = groupdao.getGroupMembers(groupname, usr);
-		rd.data = group;
+		if(group != null && group.getId() != null){
+			rd.data = group;
+		}else{
+			rd.data = false;
+			String errors[] = {"groupname/owneremail does not exist"};
+			rd.errors = errors;
+		}
 		return rd;
 	}
 	
@@ -58,7 +64,16 @@ public class GroupsController {
 		ResponseData rd= new ResponseData();
 		User usr = userdao.findUserByEmail(group.getOwneremail());
 		int status = groupdao.deleteGroupMembers(group.getName(), usr);
-		rd.data = status;
+		if(status == 1){
+			String messages[] = {"successfully deleted."};
+			rd.messages = messages;
+			rd.data = true;
+		}else{
+			rd.data = false;
+			String errors[] = {"Failed"};
+			rd.errors = errors;
+		}
+		
 		return rd;
 	}
 
