@@ -5,6 +5,7 @@ import java.util.List;
 public class GroupDto {
 	private Integer id;
 	private String name;
+	private String owneremail;
 	private List<String> emails;
 	public Integer getId() {
 		return id;
@@ -24,5 +25,11 @@ public class GroupDto {
 	public void setEmails(List<String> emails) {
 		this.emails = emails;
 	}
-
+	public String getOwneremail() {
+		return owneremail;
+	}
+	public void setOwneremail(String owneremail) {
+		this.owneremail = owneremail;
+	}
+	
 }

@@ -13,6 +13,7 @@ import com.edspread.mobileapp.dao.GroupDao;
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dto.GroupDto;
 import com.edspread.mobileapp.dto.ResponseData;
+import com.edspread.mobileapp.entity.User;
 
 @Controller
 @RequestMapping("/group")
@@ -20,14 +21,26 @@ public class GroupsController {
 	
 	@Autowired
 	GroupDao groupdao;
+	@Autowired
+	UserDao userdao;
 	
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public @ResponseBody ResponseData addGroups(@RequestBody GroupDto group) {
 		ResponseData rd= new ResponseData();
-		
-		Integer groupId = groupdao.saveGroupMembers(group);
+		try{
+		User usr = userdao.findUserByEmail(group.getOwneremail());
+		if(usr != null){
+		Integer groupId = groupdao.saveGroupMembers(group, usr);
 		group.setId(groupId);
 		rd.data = group;
+		}else{
+			String errors[] = {"Owner does not exist"};
+			rd.errors = errors;
+		}
+		}catch(Exception e){
+			String errors[] = {e.getMessage()};
+			rd.errors = errors;
+		}
 		return rd;
 	}
 	

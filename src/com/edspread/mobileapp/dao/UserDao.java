@@ -1,17 +1,14 @@
 package com.edspread.mobileapp.dao;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.entity.User;
 import com.edspread.mobileapp.entity.UserDetail;
@@ -174,7 +171,7 @@ public class UserDao {
 	}
 	
 	public int addUserDetails(UserDto udo){
-		User usr = getUserByEmail(udo.getEmail());
+		User usr = findUserByEmail(udo.getEmail());
 		int status = 0;
 		if(usr != null){
 			Date today = new Date();
@@ -196,7 +193,7 @@ public class UserDao {
 	}
 	
 	public UserDetail getUserDetailsByEmail(String email){
-		User usr = getUserByEmail(email);
+		User usr = findUserByEmail(email);
 		int status = 0;
 		UserDetail ud = null;
 		if(usr != null){
@@ -230,7 +227,7 @@ public class UserDao {
 	
 	
 	
-	public User getUserByEmail(String email){
+	public User findUserByEmail(String email){
 		String sql = "select * from APIUser where email=?";
 		User usr = null;
 		try{

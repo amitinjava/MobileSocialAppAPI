@@ -1,5 +1,7 @@
 package com.edspread.mobileapp.dao;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,9 +11,11 @@ import java.util.Map;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.edspread.mobileapp.dto.GroupDto;
+import com.edspread.mobileapp.entity.Groups;
 import com.edspread.mobileapp.entity.User;
 
 public class GroupDao {
@@ -21,28 +25,59 @@ public class GroupDao {
 	    this.jdbcTemplate = jdbcTemplate;  
 	}  
 	
-	public Integer saveGroupMembers(GroupDto gdto) throws DuplicateKeyException{
+	public Integer saveGroupMembers(GroupDto gdto, User user) throws DuplicateKeyException{
 		
 		Date today = new Date(); 
-		Number groupId = saveGroup(gdto, today);
+		Number groupId = saveGroup(gdto, today, user);
 		
 		
 		return Integer.parseInt(groupId.toString());
 	}
 	
-	private Number saveGroup(GroupDto gdto, Date today) {
+	private Groups findGroupIdByNameAndOwner(String groupName, Integer ownerid){
+		String sql = "SELECT * FROM GROUPS GP WHERE GP.OWNER = ? AND GP.NAME = ?";
+		Groups groups = null;
+		try{
+		groups =  (Groups)jdbcTemplate.queryForObject(sql, new Object[]
+		        {ownerid,  groupName }, new RowMapper()
+        {
+            @Override
+            public Groups mapRow(ResultSet rs, int rowNum) throws SQLException
+            {
+            	
+            	Groups grps = new Groups();
+            	grps.setId(rs.getInt(1));
+            	//usr.setEmail(rs.getString(2));
+                return grps;
+            }
+        });
+		}catch(EmptyResultDataAccessException e){
+			return groups;
+		}
+		return groups;
+		
+	}
+	
+	private Number saveGroup(GroupDto gdto, Date today, User usr) {
+		Groups existingGroups = findGroupIdByNameAndOwner(gdto.getName(), usr.getId());
+		Number groupId = null;
+		if(existingGroups == null){
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(this.jdbcTemplate).withTableName("groups")
 				.usingGeneratedKeyColumns("id");
-		;
 
 		Map<String, Object> groupparams = new HashMap();
 		groupparams.put("ID", gdto.getId());
 		groupparams.put("name", gdto.getName());
-		groupparams.put("owner", gdto.getName());
+		groupparams.put("owner", usr.getId());
 		groupparams.put("created_at", today);
 		groupparams.put("updated_at", today);
 		groupparams.put("active", true);
-		final Number groupId = insert.executeAndReturnKey(groupparams);
+		groupId = insert.executeAndReturnKey(groupparams);
+		}else{
+			groupId = existingGroups.getId();
+		}
+		
+		
 		if(gdto.getEmails() != null && !gdto.getEmails().isEmpty()){
 		List<User> users = getMembersId(gdto.getEmails());
 		
@@ -60,10 +95,8 @@ public class GroupDao {
 	public List<User> getMembersId(List<String> emails){
 		String sql = "select * from APIUser where email in (";
 		for(String email : emails){
-			sql = sql+"'"+email+"'";
-			if(emails.size() > 1){
-				sql =sql+",";
-			}
+			sql = sql+"'"+email+"',";
+			
 		}
 		sql = sql.substring(0, sql.length()-1);
 		sql = sql +") and active=1";
