@@ -14,9 +14,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import com.edspread.mobileapp.dto.ChannelDto;
 import com.edspread.mobileapp.dto.GroupDto;
+import com.edspread.mobileapp.entity.Channel;
 import com.edspread.mobileapp.entity.Groups;
 import com.edspread.mobileapp.entity.User;
+import com.edspread.mobileapp.utils.DateUtil;
 
 public class GroupDao {
 	private JdbcTemplate jdbcTemplate;  
@@ -84,7 +87,6 @@ public class GroupDao {
 		
 		String sql = "insert into groupsmembers values(?,?,?,?,?,?,?,?)";
 		for(User user:users){
-		System.out.println(groupId); 
 		       int status = jdbcTemplate.update(sql, new Object[]
 		        {null, groupId, user.getId(), today,today,null,null, true});
 		}
@@ -153,6 +155,48 @@ public class GroupDao {
 		System.out.println(status);
 		return status;
 	}
+
+	public ChannelDto addChannel(ChannelDto channel, User usr) {
+		ChannelDto exsThannel = findXMsgById(channel);
+		if(exsThannel != null && exsThannel.getxMsgId() != null){
+			return exsThannel;
+		}else{
+		Date currentDate = DateUtil.getTodayDate();
+		String name = "Channel-"+System.currentTimeMillis();
+		String sql = "insert into channel values(?,?,?,?,?)";
+		       int status = jdbcTemplate.update(sql, new Object[]
+		        {null, name, channel.getOwneremail(), currentDate, true});
+		       if(status == 1){
+		    	   return channel;
+		       }else{
+		    	   return null;
+		       }
+		}
+	}
 	
+	private ChannelDto findXMsgById(ChannelDto chanel){
+		String groupsql = "SELECT xm.ID as xmid, xm.sequenceNo as sequenceNo, xm.httpmessagepath as httpmessagepath, cl.name as name, cl.ID as cid FROM channel cl, exmessage xm where cl.ID = xm.channel_id and xm.ID=?";
+		List<Map<String,Object>> channelmap = null;
+		ChannelDto cdto = null;
+		try{
+			channelmap =  jdbcTemplate.queryForList(groupsql, new Object[]
+	        { chanel.getxMsgId() });
+			
+			cdto = new ChannelDto();
+			
+			for(Map<String,Object> map:channelmap){
+				cdto.setName(map.get("name").toString());
+				cdto.setHttpmessagepath(map.get("httpmessagepath").toString());
+				cdto.setSequenceNo(Integer.parseInt(map.get("sequenceNo").toString()));
+				cdto.setChannelId(Integer.parseInt(map.get("cid").toString()));
+				cdto.setxMsgId(Integer.parseInt(map.get("xmid").toString()));
+			}
+			
+			}catch(EmptyResultDataAccessException e){
+				return null;
+			}
+		
+		return cdto;
+	}
 	
 }

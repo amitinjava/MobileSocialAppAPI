@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.edspread.mobileapp.dao.GroupDao;
 import com.edspread.mobileapp.dao.UserDao;
+import com.edspread.mobileapp.dto.ChannelDto;
 import com.edspread.mobileapp.dto.GroupDto;
 import com.edspread.mobileapp.dto.ResponseData;
 import com.edspread.mobileapp.entity.User;
@@ -74,6 +75,25 @@ public class GroupsController {
 			rd.errors = errors;
 		}
 		
+		return rd;
+	}
+	
+	@RequestMapping(value = "/channel", method = RequestMethod.POST)
+	public @ResponseBody ResponseData addChannels(@RequestBody ChannelDto channel) {
+		ResponseData rd= new ResponseData();
+		try{
+		User usr = userdao.findUserByEmail(channel.getOwneremail());
+		//if(usr != null){
+		ChannelDto rchannel = groupdao.addChannel(channel, usr);
+		rd.data = rchannel;
+		/*}else{
+			String errors[] = {"Owner does not exist"};
+			rd.errors = errors;
+		}*/
+		}catch(Exception e){
+			String errors[] = {e.getMessage()};
+			rd.errors = errors;
+		}
 		return rd;
 	}
 
