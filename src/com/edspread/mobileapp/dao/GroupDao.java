@@ -216,8 +216,8 @@ public class GroupDao {
 	}
 	
 	public Collection<GroupDto> findGroupDetailsByUserId(Integer userId){
-		String gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner=?";
-		
+		//String gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner=?";
+		String gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM groups gps left join  APIUser apu   on apu.ID = gps.owner left join groupsmembers gms on gps.ID=gms.groupid left join APIUser apu1 on gms.userid = apu1.id where gps.owner=?";
 		
 		List<Map<String,Object>> groupsmap = null;
 		GroupDto gdto = null;
@@ -229,6 +229,9 @@ public class GroupDao {
 			
 			if(groupsmap == null || groupsmap.isEmpty()){
 				ownerIds = findGroupOwnerByMembersId(userId);
+				if(ownerIds == null || ownerIds.isEmpty()){
+					return groupnames.values();
+				}
 				gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner in (";
 				for(Integer Id:ownerIds){
 					gdsql = gdsql+Id+",";
@@ -255,7 +258,9 @@ public class GroupDao {
 				}else{
 					gdto = new GroupDto();
 					gdto.setEmails(new ArrayList<String>());
-					gdto.getEmails().add(map.get("memberEmail").toString());
+					if(map.get("memberEmail") != null){
+						gdto.getEmails().add(map.get("memberEmail").toString());
+					}
 					grpId = Integer.parseInt(map.get("groupid").toString());
 					ownerEmail = map.get("ownerEmail").toString();
 					gdto.setId(grpId);
