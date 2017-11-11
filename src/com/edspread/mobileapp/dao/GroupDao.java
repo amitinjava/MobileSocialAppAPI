@@ -156,26 +156,23 @@ public class GroupDao {
 		return status;
 	}
 
-	public ChannelDto addChannel(ChannelDto channel, User usr) {
-		ChannelDto exsThannel = findXMsgById(channel);
-		if(exsThannel != null && exsThannel.getxMsgId() != null){
-			return exsThannel;
-		}else{
-		Date currentDate = DateUtil.getTodayDate();
-		String name = "Channel-"+System.currentTimeMillis();
-		String sql = "insert into channel values(?,?,?,?,?)";
-		       int status = jdbcTemplate.update(sql, new Object[]
-		        {null, name, channel.getOwneremail(), currentDate, true});
-		       if(status == 1){
-		    	   return channel;
-		       }else{
-		    	   return null;
-		       }
-		}
+	public int addChannel(ChannelDto xmessage, User usr) {
+		Date today = new Date(); 
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(this.jdbcTemplate).withTableName("xmessage")
+				.usingGeneratedKeyColumns("id");
+		Map<String, Object> xmessageparams = new HashMap();
+		xmessageparams.put("id", xmessage.getxMsgId());
+		xmessageparams.put("name", xmessage.getTitle());
+		xmessageparams.put("owner", usr.getId());
+		xmessageparams.put("created_at", today);
+		xmessageparams.put("active", true);
+		Number xmessageId =  insert.executeAndReturnKey(xmessageparams);   
+		return xmessageId.intValue();
+	
 	}
 	
 	private ChannelDto findXMsgById(ChannelDto chanel){
-		String groupsql = "SELECT xm.ID as xmid, xm.sequenceNo as sequenceNo, xm.httpmessagepath as httpmessagepath, cl.name as name, cl.ID as cid FROM channel cl, exmessage xm where cl.ID = xm.channel_id and xm.ID=?";
+		String groupsql = "SELECT msg.id as xmid, msg.sequence_num as sequenceNo, msg.httpmessagepath as httpmessagepath, xmsg.name as name, xmsg.id as xmsgid FROM xmessage xmsg, message msg where xmsg.id = msg.xmsg_id and msg.id=?";
 		List<Map<String,Object>> channelmap = null;
 		ChannelDto cdto = null;
 		try{
@@ -188,8 +185,8 @@ public class GroupDao {
 				cdto.setName(map.get("name").toString());
 				cdto.setHttpmessagepath(map.get("httpmessagepath").toString());
 				cdto.setSequenceNo(Integer.parseInt(map.get("sequenceNo").toString()));
-				cdto.setChannelId(Integer.parseInt(map.get("cid").toString()));
-				cdto.setxMsgId(Integer.parseInt(map.get("xmid").toString()));
+				cdto.setxMsgId(Integer.parseInt(map.get("cid").toString()));
+				cdto.setMessageId(Integer.parseInt(map.get("xmid").toString()));
 			}
 			
 			}catch(EmptyResultDataAccessException e){
@@ -197,6 +194,25 @@ public class GroupDao {
 			}
 		
 		return cdto;
+	}
+	
+	public Integer getMaxMessageSequence(Integer xMsgId) {
+		Integer seqNum = 0;
+		String maxSeqSQL = "Select  max(sequence_num)  from  message where xmsg_id = ?";
+		List<Map<String,Object>> resultmap = null;
+		try{
+			resultmap =  jdbcTemplate.queryForList(maxSeqSQL, new Object[]
+	        {xMsgId});
+			
+			for(Map<String,Object> map:resultmap){
+				seqNum = (Integer) map.get("sequence_num");
+				
+			}
+			
+		}catch(EmptyResultDataAccessException e){
+				
+		}
+		return seqNum;
 	}
 	
 }

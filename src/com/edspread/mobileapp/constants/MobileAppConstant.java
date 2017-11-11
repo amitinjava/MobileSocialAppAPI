@@ -7,4 +7,5 @@ public class MobileAppConstant {
 	public static final String DATE_FORMAT = "dd-MM-yyyy";
 	//public static final String SERVERHTTPPATH = "http://192.168.1.150/ttmac/";
 	public static final String SERVERHTTPPATH = "http://52.33.173.146/MobileSocialAppAPI/";
+	public static final String XMSG_SERVERHTTPPATH = "http://52.33.173.146/mt/editlecture";
 }

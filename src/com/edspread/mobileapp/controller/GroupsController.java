@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.edspread.mobileapp.constants.MobileAppConstant;
 import com.edspread.mobileapp.dao.GroupDao;
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dto.ChannelDto;
@@ -79,19 +80,37 @@ public class GroupsController {
 	}
 	
 	@RequestMapping(value = "/channel", method = RequestMethod.POST)
-	public @ResponseBody ResponseData addChannels(@RequestBody ChannelDto channel) {
+	public @ResponseBody ResponseData addXmessage(@RequestBody ChannelDto channel) {
 		ResponseData rd= new ResponseData();
+		int sequenceNumber = 0;
 		try{
-		User usr = userdao.findUserByEmail(channel.getOwneremail());
-		//if(usr != null){
-		ChannelDto rchannel = groupdao.addChannel(channel, usr);
-		rd.data = rchannel;
-		/*}else{
-			String errors[] = {"Owner does not exist"};
-			rd.errors = errors;
-		}*/
-		}catch(Exception e){
-			String errors[] = {e.getMessage()};
+			if(channel.getxMsgId() ==  null){
+				// New Xmessage 
+				// 1) create new xmessage
+				// 2) create message with new sequence
+				User usr = userdao.findUserById(channel.getFrom());
+				if(usr == null){
+					rd.data = false;
+					String errors[] = {"Invalid Sender id"};
+					rd.errors = errors;
+					return rd;
+				}else{
+					channel.setUserId(usr.getId());
+					int xmesssageId = groupdao.addChannel(channel, usr);
+					channel.setxMsgId(xmesssageId);
+				}
+			}else{
+				sequenceNumber = groupdao.getMaxMessageSequence(channel.getxMsgId());
+			}
+			channel.setSequenceNo(sequenceNumber);
+			channel.setHttpaPath(MobileAppConstant.XMSG_SERVERHTTPPATH);
+			/*httpaPath = 
+			xmsgId=101
+			name=test
+			userId=100*/
+			rd.data = channel;
+		}catch (Exception e) {
+			String errors[] = { e.getMessage() };
 			rd.errors = errors;
 		}
 		return rd;

@@ -247,6 +247,34 @@ public class UserDao {
 		
 		}catch(EmptyResultDataAccessException e){
 			return null;
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return usr;
+	}
+	
+	public User findUserById(Integer id){
+		String sql = "select * from APIUser where id=?";
+		User usr = null;
+		try{
+		usr = (User) jdbcTemplate.queryForObject(sql, new Object[]
+        { id }, new RowMapper()
+        {
+            @Override
+            public User mapRow(ResultSet rs, int rowNum) throws SQLException
+            {
+            	
+            	User usr = new User();
+            	usr.setId(rs.getInt(1));
+            	usr.setEmail(rs.getString(2));
+                return usr;
+            }
+        });
+		
+		}catch(EmptyResultDataAccessException e){
+			return null;
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
 		return usr;
 	}
