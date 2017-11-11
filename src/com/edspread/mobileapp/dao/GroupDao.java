@@ -102,7 +102,6 @@ public class GroupDao {
 		}
 		sql = sql.substring(0, sql.length()-1);
 		sql = sql +") and active=1";
-		System.out.println(sql);
 		List<Map<String,Object>> usrs = null;
 		List<User> userList = new ArrayList<User>();
 		try{
@@ -215,4 +214,62 @@ public class GroupDao {
 		return seqNum;
 	}
 	
+	public GroupDto findGroupDetailsByUserId(Integer userId){
+		String gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner=?";
+		
+		
+		List<Map<String,Object>> groupsmap = null;
+		GroupDto gdto = null;
+		Integer ownerId = 0;
+		try{
+			groupsmap =  jdbcTemplate.queryForList(gdsql, new Object[]
+	        {userId});
+			
+			if(groupsmap == null || groupsmap.isEmpty()){
+				ownerId = findGroupOwnerByMembersId(userId);
+				groupsmap =  jdbcTemplate.queryForList(gdsql, new Object[]
+				        {ownerId});
+			}
+			
+			gdto = new GroupDto();
+			gdto.setEmails(new ArrayList<String>());
+			Integer grpId = null;
+			String groupName=null;
+			String ownerEmail=null;
+			for(Map<String,Object> map:groupsmap){
+				gdto.getEmails().add(map.get("memberEmail").toString());
+				grpId = Integer.parseInt(map.get("groupid").toString());
+				groupName = map.get("groupName").toString();
+				ownerEmail = map.get("ownerEmail").toString();
+			}
+			gdto.setId(grpId);
+			gdto.setName(groupName);
+			gdto.setOwneremail(ownerEmail);
+			}catch(EmptyResultDataAccessException e){
+				return null;
+			}
+		
+		return gdto;
+	}
+	
+	private Integer findGroupOwnerByMembersId(Integer memberid){
+		String ownersql = "select gps.owner from groupsmembers gms join groups gps on gms.groupid=gps.id and gms.userid = ?";
+		Integer owner = null;
+		Integer ownerid = 0; 
+		try{
+			owner =  (Integer)jdbcTemplate.queryForObject(ownersql, new Object[]
+		        {memberid}, new RowMapper()
+        {
+            @Override
+            public Integer mapRow(ResultSet rs, int rowNum) throws SQLException
+            {
+                return rs.getInt(1);
+            }
+        });
+		}catch(EmptyResultDataAccessException e){
+			return owner;
+		}
+		return owner;
+		
+	}
 }

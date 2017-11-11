@@ -115,5 +115,19 @@ public class GroupsController {
 		}
 		return rd;
 	}
+	
+	@RequestMapping(value = "/details/{userid}", method = RequestMethod.GET)
+	public @ResponseBody ResponseData getGroupsByUserId(@PathVariable Integer userid) {
+		ResponseData rd= new ResponseData();
+		GroupDto group = groupdao.findGroupDetailsByUserId(userid);
+		if(group != null && group.getId() != null){
+			rd.data = group;
+		}else{
+			rd.data = false;
+			String errors[] = {"userId does not exist"};
+			rd.errors = errors;
+		}
+		return rd;
+	}
 
 }
