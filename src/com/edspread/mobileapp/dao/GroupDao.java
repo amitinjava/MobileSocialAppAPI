@@ -232,7 +232,7 @@ public class GroupDao {
 				if(ownerIds == null || ownerIds.isEmpty()){
 					return groupnames.values();
 				}
-				gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner in (";
+				gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM groups gps left join  APIUser apu   on apu.ID = gps.owner left join groupsmembers gms on gps.ID=gms.groupid left join APIUser apu1 on gms.userid = apu1.id where gps.owner in (";
 				for(Integer Id:ownerIds){
 					gdsql = gdsql+Id+",";
 				}
