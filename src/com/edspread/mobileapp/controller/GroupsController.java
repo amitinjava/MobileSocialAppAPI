@@ -1,5 +1,8 @@
 package com.edspread.mobileapp.controller;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -119,9 +122,9 @@ public class GroupsController {
 	@RequestMapping(value = "/details/{userid}", method = RequestMethod.GET)
 	public @ResponseBody ResponseData getGroupsByUserId(@PathVariable Integer userid) {
 		ResponseData rd= new ResponseData();
-		GroupDto group = groupdao.findGroupDetailsByUserId(userid);
-		if(group != null && group.getId() != null){
-			rd.data = group;
+		Collection<GroupDto> groups = groupdao.findGroupDetailsByUserId(userid);
+		if(groups != null && !groups.isEmpty()){
+			rd.data = groups;
 		}else{
 			rd.data = false;
 			String errors[] = {"userId does not exist"};

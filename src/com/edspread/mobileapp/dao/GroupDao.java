@@ -3,6 +3,7 @@ package com.edspread.mobileapp.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -214,22 +215,31 @@ public class GroupDao {
 		return seqNum;
 	}
 	
-	public GroupDto findGroupDetailsByUserId(Integer userId){
+	public Collection<GroupDto> findGroupDetailsByUserId(Integer userId){
 		String gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner=?";
 		
 		
 		List<Map<String,Object>> groupsmap = null;
 		GroupDto gdto = null;
-		Integer ownerId = 0;
+		List<Integer> ownerIds = null;
+		Map<String,GroupDto> groupnames = new HashMap<String, GroupDto>();
 		try{
 			groupsmap =  jdbcTemplate.queryForList(gdsql, new Object[]
 	        {userId});
 			
 			if(groupsmap == null || groupsmap.isEmpty()){
-				ownerId = findGroupOwnerByMembersId(userId);
+				ownerIds = findGroupOwnerByMembersId(userId);
+				gdsql = "SELECT gps.ID as groupid, gps.name as groupName ,gps.owner as owner, apu.email as ownerEmail, gms.userid as memeberId, apu1.email as memberEmail FROM APIUser apu join  groups gps on apu.ID = gps.owner join groupsmembers gms on gps.ID=gms.groupid join APIUser apu1 on gms.userid = apu1.id where gps.owner in (";
+				for(Integer Id:ownerIds){
+					gdsql = gdsql+Id+",";
+				}
+				gdsql = gdsql.substring(0, gdsql.length()-1) + ")";
 				groupsmap =  jdbcTemplate.queryForList(gdsql, new Object[]
-				        {ownerId});
+				        {});
 			}
+			
+			
+			
 			
 			gdto = new GroupDto();
 			gdto.setEmails(new ArrayList<String>());
@@ -237,39 +247,52 @@ public class GroupDao {
 			String groupName=null;
 			String ownerEmail=null;
 			for(Map<String,Object> map:groupsmap){
-				gdto.getEmails().add(map.get("memberEmail").toString());
-				grpId = Integer.parseInt(map.get("groupid").toString());
 				groupName = map.get("groupName").toString();
-				ownerEmail = map.get("ownerEmail").toString();
+				
+				
+				if(groupnames.containsKey(groupName)){
+					groupnames.get(groupName).getEmails().add(map.get("memberEmail").toString());
+				}else{
+					gdto = new GroupDto();
+					gdto.setEmails(new ArrayList<String>());
+					gdto.getEmails().add(map.get("memberEmail").toString());
+					grpId = Integer.parseInt(map.get("groupid").toString());
+					ownerEmail = map.get("ownerEmail").toString();
+					gdto.setId(grpId);
+					gdto.setName(groupName);
+					gdto.setOwneremail(ownerEmail);
+					groupnames.put(groupName, gdto);
+				}
+				
 			}
-			gdto.setId(grpId);
-			gdto.setName(groupName);
-			gdto.setOwneremail(ownerEmail);
+			
 			}catch(EmptyResultDataAccessException e){
 				return null;
 			}
 		
-		return gdto;
+		return groupnames.values();
 	}
 	
-	private Integer findGroupOwnerByMembersId(Integer memberid){
-		String ownersql = "select gps.owner from groupsmembers gms join groups gps on gms.groupid=gps.id and gms.userid = ?";
-		Integer owner = null;
-		Integer ownerid = 0; 
+	private List<Integer> findGroupOwnerByMembersId(Integer memberid){
+		String ownersql = "select gps.owner as ownerId from groupsmembers gms join groups gps on gms.groupid=gps.id and gms.userid = ?";
+		List<Integer> ownerids =null; 
+		List<Map<String,Object>> ownerIds = null;
 		try{
-			owner =  (Integer)jdbcTemplate.queryForObject(ownersql, new Object[]
-		        {memberid}, new RowMapper()
-        {
-            @Override
-            public Integer mapRow(ResultSet rs, int rowNum) throws SQLException
-            {
-                return rs.getInt(1);
-            }
-        });
+			ownerIds = jdbcTemplate.queryForList(ownersql, new Object[]
+		        {memberid});
+			if(!ownerIds.isEmpty()){
+				ownerids = new ArrayList<Integer>(); 
+				
+				for(Map<String,Object> map:ownerIds){
+					ownerids.add(Integer.parseInt(map.get("ownerId").toString()));
+				}
+				
+			}
+			
 		}catch(EmptyResultDataAccessException e){
-			return owner;
+			return ownerids;
 		}
-		return owner;
+		return ownerids;
 		
 	}
 }
