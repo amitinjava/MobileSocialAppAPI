@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.edspread.mobileapp.constants.MobileAppConstant;
 import com.edspread.mobileapp.dao.UserDao;
 import com.edspread.mobileapp.dao.UserFriendsDao;
+import com.edspread.mobileapp.dto.FriendDTO;
 import com.edspread.mobileapp.dto.ResponseData;
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.dto.XmppUserDTO;
@@ -178,7 +179,7 @@ public class UserController {
 			e.printStackTrace();
 		}
 		if (usr != null && usr.getId() != null) {
-			List<String> emails = userFriendsDao.getFriendsEmail(user.email);
+			List<FriendDTO> emails = userFriendsDao.getFriendsEmail(user.email);
 			rd.data = emails;
 			String messages[] = {"User is Activated"};
 			rd.messages = messages;
@@ -283,7 +284,7 @@ public class UserController {
 	
 	@RequestMapping(value = "/friends", method = RequestMethod.GET)
 	public @ResponseBody ResponseData friends(@RequestParam String email) {
-		List<String> emails = userFriendsDao.getFriendsEmail(email);
+		List<FriendDTO> emails = userFriendsDao.getFriendsEmail(email);
 		ResponseData rd= new ResponseData();
 		rd.data = emails;
 		return rd;

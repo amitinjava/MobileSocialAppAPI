@@ -15,6 +15,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+
+import com.edspread.mobileapp.dto.FriendDTO;
 import com.edspread.mobileapp.dto.UserDto;
 import com.edspread.mobileapp.entity.User;
 import com.edspread.mobileapp.entity.UserFriends;
@@ -94,16 +96,21 @@ public class UserFriendsDao {
 		return userList;
 	}
 	
-	public List<String> getFriendsEmail(String email){
-		String sql = "select username from ofuser where email !=?";
+	public List<FriendDTO> getFriendsEmail(String email){
+		String sql = "select ofu.username, apiu.id  from ofuser ofu join APIUser apiu on ofu.email = apiu.email  where ofu.email !=?";
 		List<Map<String,Object>> usrs = null;
-		List<String> userList = new ArrayList<String>();
+		List<FriendDTO> userList = new ArrayList<FriendDTO>();
 		try{
 		usrs =  jdbcTemplate.queryForList(sql, new Object[]
         { email });
 		
+		
+		FriendDTO fdto = new FriendDTO();
 		for(Map<String,Object> map:usrs){
-			userList.add(map.get("username").toString());
+			fdto = new FriendDTO();
+			fdto.setEmail(map.get("username").toString());
+			fdto.setId(Integer.parseInt( map.get("id").toString()));
+			userList.add(fdto);
 		}
 		
 		}catch(EmptyResultDataAccessException e){
