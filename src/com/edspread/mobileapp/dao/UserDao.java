@@ -59,6 +59,7 @@ public class UserDao {
 		UserDto udo = new UserDto();
 		if( usr.id != null  && password.equals(dpassword)){
 			udo.active = usr.active;
+			udo.setId(usr.getId());
 			return udo;
 		}else{
 			return null;

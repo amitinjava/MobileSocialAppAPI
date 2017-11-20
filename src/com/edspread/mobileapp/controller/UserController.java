@@ -79,6 +79,7 @@ public class UserController {
 			}else if(udo.active){
 				String[] messages = {"Successfully Logged-In."};
 				rd.messages = messages;
+				rd.data = udo.id;
 			}
 		}
 		return rd;
